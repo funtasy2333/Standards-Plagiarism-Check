@@ -1,0 +1,247 @@
+{
+  "$defs": {
+    "ChapterScopeDecision": {
+      "description": "Appendix B Step b): Host Agent decision on whether a chapter belongs to core technical scope.",
+      "properties": {
+        "chapter_no": {
+          "title": "Chapter No",
+          "type": "string"
+        },
+        "chapter_title": {
+          "default": "",
+          "title": "Chapter Title",
+          "type": "string"
+        },
+        "in_comparison_scope": {
+          "title": "In Comparison Scope",
+          "type": "boolean"
+        },
+        "reason": {
+          "default": "",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "chapter_no",
+        "in_comparison_scope"
+      ],
+      "title": "ChapterScopeDecision",
+      "type": "object"
+    },
+    "ClauseComparison": {
+      "description": "Appendix B Step c & d): Detailed technical comparison result for one leaf clause.",
+      "properties": {
+        "clause_id": {
+          "title": "Clause Id",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/ClauseVerdict"
+        },
+        "overlap_ratio": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Overlap Ratio",
+          "type": "number"
+        },
+        "matched_clauses": {
+          "items": {
+            "$ref": "#/$defs/MatchedReferenceClause"
+          },
+          "title": "Matched Clauses",
+          "type": "array"
+        },
+        "technical_reasoning": {
+          "default": "",
+          "title": "Technical Reasoning",
+          "type": "string"
+        }
+      },
+      "required": [
+        "clause_id",
+        "verdict"
+      ],
+      "title": "ClauseComparison",
+      "type": "object"
+    },
+    "ClauseVerdict": {
+      "description": "Technical duplication verdict for a single leaf clause.",
+      "enum": [
+        "DUPLICATE_EXACT",
+        "DUPLICATE_EQUIVALENT",
+        "DUPLICATE_PARTIAL",
+        "NON_DUPLICATE_DIRECT_REF",
+        "NON_DUPLICATE_UPGRADED",
+        "NON_DUPLICATE_UNIQUE"
+      ],
+      "title": "ClauseVerdict",
+      "type": "string"
+    },
+    "MatchedReferenceClause": {
+      "description": "Reference clause matched against a target leaf clause.",
+      "properties": {
+        "reference_id": {
+          "title": "Reference Id",
+          "type": "string"
+        },
+        "reference_code": {
+          "default": "",
+          "title": "Reference Code",
+          "type": "string"
+        },
+        "reference_clause_id": {
+          "title": "Reference Clause Id",
+          "type": "string"
+        },
+        "reference_clause_title": {
+          "default": "",
+          "title": "Reference Clause Title",
+          "type": "string"
+        },
+        "reference_excerpt": {
+          "default": "",
+          "title": "Reference Excerpt",
+          "type": "string"
+        },
+        "overlap_contribution": {
+          "default": 1.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Overlap Contribution",
+          "type": "number"
+        },
+        "match_note": {
+          "default": "",
+          "title": "Match Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reference_id",
+        "reference_clause_id"
+      ],
+      "title": "MatchedReferenceClause",
+      "type": "object"
+    },
+    "ObjectConsistency": {
+      "description": "Appendix B Step a): Consistency of standardization object between target and reference.",
+      "enum": [
+        "IDENTICAL",
+        "SIMILAR",
+        "INCONSISTENT"
+      ],
+      "title": "ObjectConsistency",
+      "type": "string"
+    },
+    "ObjectConsistencyResult": {
+      "description": "Appendix B Step a): Assessment of standardization object and scope alignment.",
+      "properties": {
+        "reference_id": {
+          "title": "Reference Id",
+          "type": "string"
+        },
+        "reference_code": {
+          "default": "",
+          "title": "Reference Code",
+          "type": "string"
+        },
+        "reference_title": {
+          "default": "",
+          "title": "Reference Title",
+          "type": "string"
+        },
+        "target_object": {
+          "description": "Explicitly identified standardization object of the group standard.",
+          "title": "Target Object",
+          "type": "string"
+        },
+        "reference_object": {
+          "description": "Explicitly identified standardization object of the reference standard.",
+          "title": "Reference Object",
+          "type": "string"
+        },
+        "target_scope_summary": {
+          "default": "",
+          "title": "Target Scope Summary",
+          "type": "string"
+        },
+        "reference_scope_summary": {
+          "default": "",
+          "title": "Reference Scope Summary",
+          "type": "string"
+        },
+        "object_consistency": {
+          "$ref": "#/$defs/ObjectConsistency"
+        },
+        "is_eligible_for_comparison": {
+          "description": "Must be False when object_consistency is INCONSISTENT.",
+          "title": "Is Eligible For Comparison",
+          "type": "boolean"
+        },
+        "consistency_reasoning": {
+          "default": "",
+          "title": "Consistency Reasoning",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reference_id",
+        "target_object",
+        "reference_object",
+        "object_consistency",
+        "is_eligible_for_comparison"
+      ],
+      "title": "ObjectConsistencyResult",
+      "type": "object"
+    }
+  },
+  "description": "JSON payload produced by the host Agent following SKILL.md.",
+  "properties": {
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "target_standard_id": {
+      "default": "target",
+      "title": "Target Standard Id",
+      "type": "string"
+    },
+    "standard_type": {
+      "default": "产品标准",
+      "description": "Identified standard type, e.g., 产品标准, 方法标准, 管理标准, 服务标准.",
+      "title": "Standard Type",
+      "type": "string"
+    },
+    "scope_matching_results": {
+      "items": {
+        "$ref": "#/$defs/ObjectConsistencyResult"
+      },
+      "title": "Scope Matching Results",
+      "type": "array"
+    },
+    "chapter_scope_decisions": {
+      "items": {
+        "$ref": "#/$defs/ChapterScopeDecision"
+      },
+      "title": "Chapter Scope Decisions",
+      "type": "array"
+    },
+    "clause_comparisons": {
+      "items": {
+        "$ref": "#/$defs/ClauseComparison"
+      },
+      "title": "Clause Comparisons",
+      "type": "array"
+    },
+    "overall_expert_notes": {
+      "default": "",
+      "title": "Overall Expert Notes",
+      "type": "string"
+    }
+  },
+  "title": "ComparisonAssessment",
+  "type": "object"
+}
