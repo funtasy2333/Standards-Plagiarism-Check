@@ -211,3 +211,12 @@ def test_zero_in_scope_clauses_raises() -> None:
     )
     with pytest.raises(CalculationError, match="n1 为 0"):
         calculate_plagiarism_report(target, [ref_similar], assessment)
+
+
+@pytest.mark.parametrize('verdict', [ClauseVerdict.DUPLICATE_EXACT, ClauseVerdict.DUPLICATE_EQUIVALENT, ClauseVerdict.DUPLICATE_PARTIAL])
+@pytest.mark.parametrize('strict', [False, True])
+def test_duplicate_without_matching_evidence_is_rejected(verdict, strict) -> None:
+    target = parse_standard_markdown('4 技术要求\n4.1 安全\n应安全。')
+    assessment = ComparisonAssessment(clause_comparisons=[ClauseComparison(clause_id='4.1', verdict=verdict, overlap_ratio=0.8)])
+    with pytest.raises(CalculationError, match='匹配'):
+        calculate_plagiarism_report(target, [], assessment, strict_clause_coverage=strict)

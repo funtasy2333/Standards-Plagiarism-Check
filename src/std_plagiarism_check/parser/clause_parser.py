@@ -106,7 +106,7 @@ def _extract_tables_and_body(lines: list[str]) -> tuple[str, list[str]]:
         if stripped.lower().startswith("<table"):
             tbl_lines = [line]
             i += 1
-            while i < n:
+            while i < n and "</table>" not in tbl_lines[-1].lower():
                 tbl_lines.append(lines[i])
                 if "</table>" in lines[i].lower():
                     i += 1
@@ -341,7 +341,11 @@ def parse_standard_markdown(
             )
             # Also skip if it's inside TOC (目次) and line ends with page number digits
             if current_chapter and current_chapter.chapter_no in ("目次", "目录"):
-                is_plausible_chapter = False
+                # TOC entries end in a page number (often after dot leaders).
+                # A chapter heading without that suffix starts the body.
+                is_plausible_chapter = is_plausible_chapter and not re.search(
+                    r"(?:[.．…·]{2,}\s*|\s+)\d+\s*$", ch_title
+                )
 
             if is_plausible_chapter:
                 auto_excl, excl_reason = _classify_top_chapter(ch_no_str, ch_title)
@@ -451,13 +455,15 @@ def parse_standard_markdown(
 
         for leaf in leaves:
             content, tables = _extract_tables_and_body(leaf.lines)
-            # If parent had lead-in lines before its children, prepend context gently if non-empty
-            if leaf.parent is not None and leaf.parent.lines:
+            # Carry constraints from every ancestor, outermost first.
+            ancestor = leaf.parent
+            while ancestor is not None:
                 parent_intro = "\n".join(
-                    ln.strip() for ln in leaf.parent.lines if ln.strip()
+                    ln.strip() for ln in ancestor.lines if ln.strip()
                 ).strip()
-                if parent_intro and parent_intro not in content:
+                if parent_intro:
                     content = f"[父条导语] {parent_intro}\n\n{content}".strip()
+                ancestor = ancestor.parent
 
             detected_refs = _extract_normative_refs_from_text(
                 f"{leaf.title}\n{content}"

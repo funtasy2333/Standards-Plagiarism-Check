@@ -157,6 +157,11 @@ def calculate_plagiarism_report(
                 technical_reasoning="未提供比对结果，默认计为独创/不重复。",
             )
 
+        if comp.verdict in _DUPLICATE_VERDICTS and not comp.matched_clauses:
+            raise CalculationError(
+                f"条款 '{clause.clause_id}' 判定为重复，但缺少匹配条款证据。"
+            )
+
         effective_verdict = comp.verdict
         effective_ratio = comp.overlap_ratio
         reasoning = comp.technical_reasoning

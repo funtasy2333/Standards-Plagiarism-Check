@@ -62,3 +62,25 @@ def test_measurement_numbers_not_split_as_clauses() -> None:
     assert ids == ["4.1.1"]
     assert "4.2 mm" in parsed.candidate_leaf_clauses[0].content
     assert "5.2 mm" in parsed.candidate_leaf_clauses[0].content
+
+
+def test_body_after_toc_without_front_matter() -> None:
+    parsed = parse_standard_markdown('目次\n1 范围 …… 1\n4 技术要求 …… 2\n4.1 安全 …… 2\n1 范围\n适用于设备。\n4 技术要求\n4.1 安全\n应安全。')
+    assert [c.clause_id for c in parsed.candidate_leaf_clauses] == ['4.1']
+    assert parsed.metadata.scope_chapter_text.endswith('适用于设备。')
+    assert parsed.candidate_leaf_clauses[0].content == '应安全。'
+
+
+def test_leaf_inherits_all_ancestor_constraints() -> None:
+    parsed = parse_standard_markdown('4 技术要求\n温度应为20℃。\n4.1 测试\n使用方法甲。\n4.1.1 操作\n执行步骤乙。')
+    content = parsed.candidate_leaf_clauses[0].content
+    assert '温度应为20℃。' in content
+    assert content.index('温度应为20℃。') < content.index('使用方法甲。') < content.index('执行步骤乙。')
+
+
+def test_single_line_html_table_does_not_consume_following_prose() -> None:
+    table = '<table><tr><td>限值</td></tr></table>'
+    parsed = parse_standard_markdown(f'4 技术要求\n4.1 安全\n{table}\n表后正文\n<table>\n<tr><td>第二表</td></tr>\n</table>\n末尾正文')
+    clause = parsed.candidate_leaf_clauses[0]
+    assert clause.tables == [table, '<table>\n<tr><td>第二表</td></tr>\n</table>']
+    assert '表后正文' in clause.content and '末尾正文' in clause.content
